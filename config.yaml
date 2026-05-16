@@ -1,0 +1,265 @@
+# IonoForecaster — ESA-Grade Ionospheric Scintillation Forecasting
+# Copernicus Master's in Digital Earth | Samuel Appiah Kubi
+# Paris Lodron University Salzburg
+
+project:
+  name: "IonoForecaster"
+  version: "1.0.0"
+  author: "Samuel Appiah Kubi"
+  institution: "Paris Lodron University Salzburg"
+  license: "MIT"
+
+study_region:
+  name: "Equatorial Africa"
+  bounds:
+    min_lon: -30
+    max_lon: 60
+    min_lat: -20
+    max_lat: 20
+
+temporal:
+  start_date: "2018-01-01"
+  end_date: "2024-12-31"
+  train_start: "2018-01-01"
+  train_end: "2020-12-31"
+  val_start: "2021-01-01"
+  val_end: "2022-12-31"
+  test_start: "2023-01-01"
+  test_end: "2024-12-31"
+  resolution_minutes: 30
+  forecast_hours: 6
+
+stations:
+  - id: "TETB"
+    name: "Cotonou"
+    country: "Benin"
+    lat: 6.3
+    lon: 2.2
+    network: "SAMBA"
+  - id: "ABMF"
+    name: "Abomey-Calavi"
+    country: "Benin"
+    lat: 6.3
+    lon: 2.3
+    network: "IGS"
+  - id: "NKLG"
+    name: "Libreville"
+    country: "Gabon"
+    lat: 0.4
+    lon: 9.7
+    network: "IGS"
+  - id: "KOUC"
+    name: "Kourou"
+    country: "French Guiana"
+    lat: 5.1
+    lon: -52.8
+    network: "IGS"
+  - id: "MBAR"
+    name: "Mbarara"
+    country: "Uganda"
+    lat: -0.6
+    lon: 30.7
+    network: "EPOSA"
+  - id: "ADIS"
+    name: "Addis Ababa"
+    country: "Ethiopia"
+    lat: 9.0
+    lon: 38.8
+    network: "EPOSA"
+  - id: "NAIR"
+    name: "Nairobi"
+    country: "Kenya"
+    lat: -1.3
+    lon: 36.8
+    network: "EPOSA"
+  - id: "DAKR"
+    name: "Dakar"
+    country: "Senegal"
+    lat: 14.7
+    lon: -17.4
+    network: "IGS"
+  - id: "LAGO"
+    name: "Lagos"
+    country: "Nigeria"
+    lat: 6.5
+    lon: 3.4
+    network: "SAMBA"
+  - id: "KHAR"
+    name: "Khartoum"
+    country: "Sudan"
+    lat: 15.6
+    lon: 32.5
+    network: "EPOSA"
+  - id: "DARE"
+    name: "Dar es Salaam"
+    country: "Tanzania"
+    lat: -6.8
+    lon: 39.3
+    network: "EPOSA"
+  - id: "LUAK"
+    name: "Lusaka"
+    country: "Zambia"
+    lat: -15.4
+    lon: 28.3
+    network: "EPOSA"
+  - id: "HARR"
+    name: "Harare"
+    country: "Zimbabwe"
+    lat: -17.8
+    lon: 31.1
+    network: "EPOSA"
+  - id: "ACCR"
+    name: "Accra"
+    country: "Ghana"
+    lat: 5.6
+    lon: -0.2
+    network: "SAMBA"
+  - id: "ABUJ"
+    name: "Abuja"
+    country: "Nigeria"
+    lat: 9.1
+    lon: 7.5
+    network: "SAMBA"
+
+data_sources:
+  gnss:
+    enabled: true
+    networks: ["SAMBA", "EPOSA", "IGS"]
+    variables: ["s4", "sigma_phi", "roti"]
+    base_url: "https://cddis.nasa.gov/archive/gnss/products/ionex/"
+    rinex_url: "https://cddis.nasa.gov/archive/gnss/data/daily/"
+  gim:
+    enabled: true
+    product: "IGS GIM"
+    resolution_deg: 2.5
+    base_url: "https://cddis.nasa.gov/archive/gnss/products/ionex/"
+  swarm:
+    enabled: true
+    product: "EFI_LP_1B"
+    variable: "electron_density"
+    base_url: "https://swarm-diss.eo.esa.int/"
+    username: null  # set via env ESA_SWARM_USER
+    password: null  # set via env ESA_SWARM_PASS
+  solar_wind:
+    enabled: true
+    satellites: ["DSCOVR", "ACE"]
+    variables: ["bz", "v_sw", "n_p", "t_p"]
+    dscovr_url: "https://services.swpc.noaa.gov/products/solar-wind/"
+    ace_url: "https://services.swpc.noaa.gov/json/ace/"
+  aurora:
+    enabled: true
+    model: "OVATION Prime"
+    base_url: "https://services.swpc.noaa.gov/json/ovation_aurora_latest.json"
+  geomagnetic:
+    enabled: true
+    indices: ["kp", "dst"]
+    kp_url: "https://www.gfz-potsdam.de/fileadmin/gfz/sec132/Kp_ap_Ap_SN_F107_since_1932.txt"
+    dst_url: "https://wdc.kugi.kyoto-u.ac.jp/dst_final/"
+
+preprocessing:
+  target_resolution_minutes: 30
+  gap_fill_method: "linear"
+  gap_max_minutes: 120
+  outlier_iqr_threshold: 3.0
+  normalisation: "minmax"
+
+graph:
+  distance_threshold_km: 2000
+  correlation_threshold: 0.7
+  edge_weight: "inverse_distance"
+  self_loops: true
+
+features:
+  tec_derivatives: true
+  coupling_functions: true
+  storm_time: true
+  harmonics: true
+  window_size: 12  # timesteps for ROTI calculation
+
+model:
+  name: "ST-GNN"
+  input_timesteps: 12
+  spatial:
+    type: "GATv2"
+    input_dim: 64
+    hidden_dim: 64
+    output_dim: 64
+    num_heads: 4
+    dropout: 0.2
+  temporal:
+    type: "BiLSTM"
+    input_size: 64
+    hidden_size: 128
+    num_layers: 2
+    dropout: 0.3
+    bidirectional: true
+  decoder:
+    hidden_dim: 128
+    output_dim: 1
+
+training:
+  epochs: 100
+  batch_size: 32
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  scheduler: "ReduceLROnPlateau"
+  scheduler_patience: 10
+  early_stopping_patience: 20
+  gradient_clip_norm: 1.0
+  mixed_precision: true
+  seed: 42
+  loss_mse_weight: 0.7
+  loss_mae_weight: 0.3
+
+forecast:
+  horizon_steps: 12  # 6 hours at 30-min resolution
+  mc_dropout_samples: 30
+  ensemble_size: 5
+
+events:
+  thresholds:
+    watch: 0.3
+    warning: 0.4
+    severe: 0.7
+  min_duration_minutes: 30
+
+alerts:
+  enabled: true
+  formats: ["json", "csv"]
+  telegram_bot_token: null   # set via env TELEGRAM_BOT_TOKEN
+  telegram_chat_id: null     # set via env TELEGRAM_CHAT_ID
+  email_smtp: null           # set via env SMTP_SERVER
+  email_from: null
+  email_to: null
+
+export:
+  stac: true
+  geojson: true
+  csv: true
+  dashboard: true
+
+dashboard:
+  tile_provider: "CartoDB Voyager"
+  default_view:
+    lon: 15
+    lat: 0
+    zoom: 3
+
+validation:
+  temporal_folds: 3
+  spatial_holdout_fraction: 0.2
+  event_based: true
+
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  features_data: "data/features"
+  graphs_data: "data/graphs"
+  models_dir: "data/models"
+  outputs_dir: "data/outputs"
+  logs_dir: "data/logs"
+
+logging:
+  level: "INFO"
+  tensorboard: true
+  checkpoint_frequency: 1

@@ -1,0 +1,54 @@
+# IonoForecaster — Python dependencies
+# Copernicus Master's in Digital Earth — ESA Portfolio
+# Author: Samuel Appiah Kubi
+
+# ── Core scientific stack ─────────────────────────────────────────────────────
+numpy>=1.24.0,<2.0
+pandas>=2.0.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+
+# ── PyTorch (CPU; for GPU add +cu118 or +cu121 to torch URL) ─────────────────
+torch>=2.1.0
+# Graph Neural Networks (optional; graceful degradation if absent)
+# torch-geometric>=2.4.0
+# torch-scatter>=2.1.0
+# torch-sparse>=0.6.18
+
+# ── Data I/O ─────────────────────────────────────────────────────────────────
+pyarrow>=14.0.0        # Parquet read/write
+requests>=2.31.0       # HTTP downloads
+PyYAML>=6.0
+
+# ── Geospatial ────────────────────────────────────────────────────────────────
+folium>=0.15.0         # Interactive maps
+# geopandas>=0.14.0    # Optional: vector data analysis
+
+# ── Visualisation ─────────────────────────────────────────────────────────────
+matplotlib>=3.7.0
+plotly>=5.18.0
+
+# ── ESA / space weather data ──────────────────────────────────────────────────
+# cdflib>=1.1.0         # ESA Swarm CDF files (optional)
+# spacepy>=0.5.0        # Space physics utilities (optional)
+
+# ── ML training utilities ─────────────────────────────────────────────────────
+tensorboard>=2.15.0    # Training visualisation
+tqdm>=4.66.0
+
+# ── STAC / metadata ────────────────────────────────────────────────────────────
+# pystac>=1.9.0          # Optional: full STAC library
+
+# ── Jupyter (for notebooks) ───────────────────────────────────────────────────
+jupyter>=1.0.0
+ipykernel>=6.27.0
+# ipywidgets>=8.1.0
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# ── Linting / formatting (dev) ────────────────────────────────────────────────
+# ruff>=0.1.0
+# black>=23.0.0
+# mypy>=1.7.0
