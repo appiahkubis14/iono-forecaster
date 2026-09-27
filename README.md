@@ -1,4 +1,4 @@
-# IonoForecaster 🛰️
+# Iono Forecaster 🛰️
 
 **AI-Based Ionospheric Scintillation Forecasting over Equatorial Africa**
 
